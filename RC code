@@ -1,0 +1,76 @@
+#include <SoftwareSerial.h>
+SoftwareSerial BT(2, 3); // RX, TX for HC-05
+
+char cmd;
+
+// Motor A pins
+int ENA = 4;
+int IN1 = 8;
+int IN2 = 9;
+
+// Motor B pins
+int ENB = 6;
+int IN3 = 10;
+int IN4 = 11;
+
+void setup() {
+  BT.begin(9600); // HC-05 baud rate
+  Serial.begin(9600); // Serial monitor for debug
+
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  Serial.println("Car Ready. Send commands via HC-05 (U/D/L/R/S)");
+}
+
+void forward() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+  analogWrite(ENA, 255); analogWrite(ENB, 255);
+  Serial.println("Command: U | Action: Forward");
+}
+
+void backward() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 255); analogWrite(ENB, 255);
+  Serial.println("Command: D | Action: Backward");
+}
+
+void leftTurn() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+  analogWrite(ENA, 150); analogWrite(ENB, 150);
+  Serial.println("Command: L | Action: Left Turn");
+}
+
+void rightTurn() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 150); analogWrite(ENB, 150);
+  Serial.println("Command: R | Action: Right Turn");
+}
+
+void stopCar() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+  analogWrite(ENA, 0); analogWrite(ENB, 0);
+  Serial.println("Command: S | Action: Stop");
+}
+
+void loop() {
+  if (BT.available()) {
+    cmd = BT.read();
+
+    if (cmd == 'U') forward();
+    else if (cmd == 'D') backward();
+    else if (cmd == 'L') leftTurn();
+    else if (cmd == 'R') rightTurn();
+    else if (cmd == 'S') stopCar();
+    else Serial.print("Unknown Command: "); Serial.println(cmd);
+  }
+}
